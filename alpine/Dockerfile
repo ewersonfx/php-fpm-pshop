@@ -47,8 +47,10 @@ RUN set -x && \
     zip \
   && rm /var/cache/apk/*
 
+RUN wget -c https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz && tar -xvf ioncube_loaders_lin_x86-64.tar.gz -C /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ --wildcards '*.so' --strip-components 1
+
 COPY php.ini /usr/local/etc/php/php.ini
 
-COPY extensions/ioncube_loader_lin_7.1.so /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ioncube_loader_lin_7.1.so
+#COPY extensions/ioncube_loader_lin_7.1.so /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ioncube_loader_lin_7.1.so
 
-RUN chmod 755 /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ioncube_loader_lin_7.1.so
+RUN chmod 755 /usr/local/lib/php/extensions/no-debug-non-zts-20160303/*.so
