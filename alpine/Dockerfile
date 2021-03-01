@@ -47,8 +47,7 @@ RUN set -x && \
     pdo_mysql \
     xsl \
     zip \
-  && rm /var/cache/apk/* \
-  && mkdir /opt/src
+  && rm /var/cache/apk/*
 
 RUN wget -c https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz && \
     tar -xvf ioncube_loaders_lin_x86-64.tar.gz -C /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ --wildcards '*.so' --strip-components 1 && \
