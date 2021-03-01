@@ -1,5 +1,7 @@
 FROM php:7.1-fpm-alpine
 
+WORKDIR /opt/src
+
 ENV PHPIZE_DEPS \
   autoconf \
   cmake \
@@ -45,7 +47,8 @@ RUN set -x && \
     pdo_mysql \
     xsl \
     zip \
-  && rm /var/cache/apk/*
+  && rm /var/cache/apk/* \
+  && mkdir /opt/src
 
 RUN wget -c https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz && \
     tar -xvf ioncube_loaders_lin_x86-64.tar.gz -C /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ --wildcards '*.so' --strip-components 1 && \
@@ -56,3 +59,10 @@ COPY php.ini /usr/local/etc/php/php.ini
 #COPY extensions/ioncube_loader_lin_7.1.so /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ioncube_loader_lin_7.1.so
 
 RUN chmod 755 /usr/local/lib/php/extensions/no-debug-non-zts-20160303/*.so
+
+COPY ./run.sh /opt/src/run.sh
+RUN chmod 755 /opt/src/run.sh
+
+RUN /opt/src/run.sh
+
+#CMD ["/opt/src/run.sh"]
