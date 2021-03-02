@@ -24,6 +24,7 @@ ENV PHPIZE_DEPS \
 
 RUN set -x && \
   apk update && apk add --no-cache --update --virtual buildDeps autoconf \
+    shadow \
     freetype \
     icu \
     libjpeg-turbo \
@@ -66,7 +67,6 @@ RUN chmod 755 /opt/src/run.sh
 
 #USER FIX UID AND GID
 RUN deluser xfs \
-    && deluser xfs \
     && usermod -u 33 www-data \
     && groupmod -g 33 www-data
 
