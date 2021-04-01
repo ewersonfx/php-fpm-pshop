@@ -1,62 +1,39 @@
-FROM php:7.1-fpm-alpine
+FROM php:7.2-fpm-alpine
 
 WORKDIR /opt/src
 
-ENV PHPIZE_DEPS \
-  autoconf \
-  cmake \
-  file \
-  freetype-dev \
-  g++ \
-  git \
-  gcc \
-  icu-dev \
-  libc-dev \
-  libjpeg-turbo-dev \
-  libmcrypt-dev \
-  libpng-dev \
-  libxslt-dev \
-  libmemcached-dev \
-  make \
-  pcre-dev \
-  pkgconf \
-  re2c
-
-RUN set -x && \
-  apk update && apk add --no-cache --update --virtual buildDeps autoconf \
-    shadow \
-    freetype \
-    icu \
-    libjpeg-turbo \
-    libmcrypt \
-    libpng \
-    libxslt \
+# install the PHP extensions we need
+RUN apk add --update freetype-dev libpng-dev libjpeg-turbo-dev libxml2-dev autoconf g++ imagemagick-dev libtool make icu-dev shadow \
     openssh \
     openssl \
     sshpass \
-    tini \
     && docker-php-ext-configure gd \
-    --with-freetype-dir=/usr/include/ \
-    --with-png-dir=/usr/include/ \
-    --with-jpeg-dir=/usr/include/ && \
-  NPROC=$(getconf _NPROCESSORS_ONLN || 1) && \
-  docker-php-ext-install -j${NPROC} \
-    gd \
-    intl \
-    mcrypt \
-    mysqli \
-    pdo_mysql \
-    xsl \
-    zip \
-  && rm /var/cache/apk/*
-
+        --with-gd \
+        --with-freetype-dir=/usr/include/ \
+        --with-png-dir=/usr/include/ \
+        --with-jpeg-dir=/usr/include/ \
+    && NPROC=$(getconf _NPROCESSORS_ONLN || 1) \
+    && docker-php-ext-install -j${NPROC} \
+       intl \
+       gd \
+       mbstring \
+       mysqli \
+       opcache \
+       bcmath \
+       zip \
+       pdo_mysql \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && apk del autoconf g++ libtool make \
+    && rm -rf /tmp/* /var/cache/apk/*
+    
 #IONCUBE
 
 RUN wget -c https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz && \
-    tar -xvf ioncube_loaders_lin_x86-64.tar.gz -C /usr/local/lib/php/extensions/no-debug-non-zts-20160303/ --wildcards '*.so' --strip-components 1 && \
+    tar -xvf ioncube_loaders_lin_x86-64.tar.gz -C /usr/local/lib/php/extensions/no-debug-non-zts-20170718/ --wildcards '*.so' --strip-components 1 && \
     rm ioncube_loaders_lin_x86-64.tar.gz
 
-RUN chmod 755 /usr/local/lib/php/extensions/no-debug-non-zts-20160303/*.so
+RUN chmod 755 /usr/local/lib/php/extensions/no-debug-non-zts-20170718/*.so
 
 COPY php.ini /usr/local/etc/php/php.ini
 

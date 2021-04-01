@@ -7,3 +7,5 @@ mkdir ~/.ssh
 
 #GET KEYS FROM HOST AND ADD TO known_hosts FILE.
 ssh-keyscan -H $docker_host >> ~/.ssh/known_hosts
+
+apk del openssh shadow
