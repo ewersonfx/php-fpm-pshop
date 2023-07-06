@@ -4,6 +4,8 @@ WORKDIR /opt/src
 
 # install the PHP extensions we need
 RUN apk add --update freetype-dev libpng-dev libjpeg-turbo-dev libxml2-dev autoconf g++ imagemagick-dev libtool make icu-dev shadow \
+    libmemcached-libs \
+    zlib \
     openssh \
     openssl \
     sshpass \
@@ -22,11 +24,32 @@ RUN apk add --update freetype-dev libpng-dev libjpeg-turbo-dev libxml2-dev autoc
        bcmath \
        zip \
        pdo_mysql \
-    && pecl install imagick \
-    && docker-php-ext-enable imagick \
+#    && pecl install imagick \
+#    && docker-php-ext-enable imagick \
+    && set -xe \
+    && cd /tmp/ \
+    && apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
+    && apk add --no-cache --update --virtual .memcached-deps zlib-dev libmemcached-dev cyrus-sasl-dev \
+    && pecl install imagick-3.4.4 \
+# Install igbinary (memcached's deps)
+    && pecl install igbinary && \
+# Install memcached
+    ( \
+        pecl install --nobuild memcached && \
+        cd "$(pecl config-get temp_dir)/memcached" && \
+        phpize && \
+        ./configure --enable-memcached-igbinary && \
+        make -j$(nproc) && \
+        make install && \
+        cd /tmp/ \
+    ) \
+# Enable PHP extensions
+    && docker-php-ext-enable igbinary memcached imagick \
+    && rm -rf /tmp/* \
+    && apk del .memcached-deps .phpize-deps \
     && apk del autoconf g++ libtool make \
     && rm -rf /tmp/* /var/cache/apk/*
-    
+
 #IONCUBE
 
 RUN wget -c https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz && \
